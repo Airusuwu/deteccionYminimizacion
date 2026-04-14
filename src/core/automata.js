@@ -14,13 +14,16 @@ export class Automata {
     this.tipo = `${tipo ?? "AFD"}`.trim().toUpperCase();
     this.transiciones = {};
 
-    if (!["AFD", "AFND"].includes(this.tipo)) {
-      throw new AutomataError("El tipo debe ser AFD o AFND.");
+    if (!["AFD", "AFND", "AUTO"].includes(this.tipo)) {
+      throw new AutomataError("El tipo debe ser AFD, AFND o AUTO.");
     }
 
     this.validateBasics();
     this.transiciones = this.normalizeTransitions(transiciones);
     this.validateTransitions();
+    if (this.tipo === "AUTO") {
+      this.tipo = Automata.detectTypeFromTransitions(this.transiciones);
+    }
     this.validateType();
   }
 
@@ -161,5 +164,21 @@ export class Automata {
       for (const destino of destinos) transitions[origen][simbolo].add(destino);
     }
     return transitions;
+  }
+
+  static detectTypeFromTransitions(transiciones = {}) {
+    for (const mapa of Object.values(transiciones)) {
+      for (const destinos of Object.values(mapa)) {
+        if (destinos instanceof Set && destinos.size > 1) {
+          return "AFND";
+        }
+
+        if (Array.isArray(destinos) && destinos.length > 1) {
+          return "AFND";
+        }
+      }
+    }
+
+    return "AFD";
   }
 }

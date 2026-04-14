@@ -5,6 +5,21 @@ import { Evaluator } from "../src/core/evaluator.js";
 import { Converter } from "../src/core/converter.js";
 import { Minimizer } from "../src/core/minimizer.js";
 
+const autoAfd = Automata.fromForm({
+  estadosTexto: "q0,q1",
+  alfabetoTexto: "a,b",
+  estadoInicialTexto: "q0",
+  estadosFinalesTexto: "q1",
+  transicionesTexto: [
+    "q0,a=q1",
+    "q0,b=q0",
+    "q1,a=q1",
+    "q1,b=q0",
+  ].join("\n"),
+  tipo: "AUTO",
+});
+assert.equal(autoAfd.tipo, "AFD");
+
 const afnd = Automata.fromForm({
   estadosTexto: "A,B,C,D",
   alfabetoTexto: "a,b",
@@ -20,8 +35,9 @@ const afnd = Automata.fromForm({
     "D,a=C",
     "D,b=C,D",
   ].join("\n"),
-  tipo: "AFND",
+  tipo: "AUTO",
 });
+assert.equal(afnd.tipo, "AFND");
 
 const evalResult = new Evaluator(afnd).evaluateString("ab");
 assert.equal(evalResult.aceptada, true);

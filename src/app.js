@@ -36,6 +36,7 @@ let connectingState = null;
 let previewPointer = null;
 let pendingConnection = null;
 let lastConversionResult = null;
+let lastMinimizationResult = null;
 let activeGraphSource = "editor";
 let activeDisplayAutomata = null;
 
@@ -45,6 +46,7 @@ document.querySelector("#evaluate-button").addEventListener("click", handleEvalu
 document.querySelector("#convert-button").addEventListener("click", handleConvert);
 document.querySelector("#minimize-button").addEventListener("click", handleMinimize);
 conversionResults.addEventListener("click", handleConversionResultClick);
+minimizationResults.addEventListener("click", handleMinimizationResultClick);
 quickNodeInput.addEventListener("keydown", handleQuickNodeSubmit);
 alphabetInput.addEventListener("input", handleAlphabetChange);
 typeSelect.addEventListener("change", handleTypeChange);
@@ -60,7 +62,7 @@ loadExample();
 
 function createEmptyEditorState() {
   return {
-    tipo: "AFD",
+    tipo: "AUTO",
     alfabeto: [],
     estados: [],
     estadoInicial: "",
@@ -71,7 +73,7 @@ function createEmptyEditorState() {
 
 function loadExample() {
   editorState = {
-    tipo: "AFND",
+    tipo: "AUTO",
     alfabeto: ["a", "b"],
     estados: ["A", "B", "C", "D"],
     estadoInicial: "A",
@@ -291,7 +293,7 @@ function buildGraphModelForPreview() {
     transiciones: editorState.transiciones,
     estadoInicial: editorState.estadoInicial,
     estadosFinales: new Set([...editorState.estadosFinales]),
-    tipo: editorState.tipo,
+    tipo: getEffectiveEditorType(),
   };
 }
 
@@ -700,6 +702,7 @@ function handleMinimize() {
   withAutomata(() => {
     const sourceAutomata = getOperationAutomata();
     const result = new Minimizer(sourceAutomata).minimize();
+    lastMinimizationResult = result;
     minimizationResults.classList.remove("empty-state");
     minimizationResults.innerHTML = renderMinimizationResult(result);
     showSuccess("Minimizacion completada.");
@@ -797,9 +800,22 @@ function renderConversionResult(result) {
 }
 
 function renderMinimizationResult(result) {
+  const drawActions = result.automataResultante
+    ? `
+      <div class="actions conversion-draw-actions">
+        <button class="secondary-button" type="button" data-action="draw-minimized">
+          Dibujar automata minimizado
+        </button>
+        <button class="ghost-button" type="button" data-action="draw-original">
+          Volver al original
+        </button>
+      </div>
+    `
+    : "";
   return `
     <article class="result-card">
       <div class="result-card-header"><div><h3>AFD minimo</h3><p>${result.mensaje}</p></div></div>
+      ${drawActions}
       <div class="step-card">
         <strong>Estados accesibles</strong>
         <p>${result.pasoInaccesibles.descripcion}</p>
@@ -896,6 +912,21 @@ function handleConversionResultClick(event) {
   }
 }
 
+function handleMinimizationResultClick(event) {
+  const action = event.target.dataset.action;
+  if (!action) {
+    return;
+  }
+
+  if (action === "draw-minimized") {
+    drawMinimizedAutomata();
+  }
+
+  if (action === "draw-original") {
+    drawOriginalAutomata();
+  }
+}
+
 function drawConvertedAutomata() {
   if (!lastConversionResult?.automataResultante) {
     handleError(new AutomataError("Primero ejecuta una conversion para poder dibujar su resultado."));
@@ -909,6 +940,21 @@ function drawConvertedAutomata() {
   activeDisplayAutomata = graphModel;
   renderAll(graphModel);
   showSuccess("Mostrando el automata resultante de la conversion en el visor central.");
+}
+
+function drawMinimizedAutomata() {
+  if (!lastMinimizationResult?.automataResultante) {
+    handleError(new AutomataError("Primero ejecuta una minimizacion para poder dibujar su resultado."));
+    return;
+  }
+
+  const graphModel = convertAutomataInstanceToGraphModel(lastMinimizationResult.automataResultante);
+  currentMode = "move";
+  graphPositions = getDefaultGraphLayout(graphModel, graphPositions);
+  activeGraphSource = "minimized";
+  activeDisplayAutomata = graphModel;
+  renderAll(graphModel);
+  showSuccess("Mostrando el automata minimizado en el visor central.");
 }
 
 function drawOriginalAutomata() {
@@ -930,9 +976,20 @@ function updateStageNote() {
     return;
   }
 
+  if (activeGraphSource === "minimized") {
+    stageNote.textContent = "Mostrando el automata minimizado. Las operaciones se aplican sobre esta vista.";
+    return;
+  }
+
   stageNote.textContent = currentMode === "connect"
     ? "Arrastra de un nodo a otro para crear un recorrido."
     : "Arrastra nodos para reordenar el automata.";
+}
+
+function getEffectiveEditorType() {
+  return editorState.tipo === "AUTO"
+    ? Automata.detectTypeFromTransitions(editorState.transiciones)
+    : editorState.tipo;
 }
 
 function convertAutomataInstanceToGraphModel(automata) {
@@ -947,6 +1004,9 @@ function convertAutomataInstanceToGraphModel(automata) {
 }
 
 function getOperationAutomata() {
+  if (activeGraphSource === "minimized" && lastMinimizationResult?.automataResultante) {
+    return lastMinimizationResult.automataResultante;
+  }
   if (activeGraphSource === "converted" && lastConversionResult?.automataResultante) {
     return lastConversionResult.automataResultante;
   }
