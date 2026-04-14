@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Laboratorio de Automatas</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <main class="workspace">
+        <aside class="side-panel left-panel">
+          <div class="compact-topbar">
+            <div>
+              <p class="section-kicker">Panel de datos</p>
+              <h1>Automata</h1>
+            </div>
+            <button id="load-example-button" class="secondary-button" type="button">
+              Ejemplo
+            </button>
+          </div>
+
+          <section class="panel-block">
+            <div class="panel-block-header">
+              <h2>Definicion</h2>
+              <p>La vista del centro se actualiza mientras editas.</p>
+            </div>
+
+            <form id="automata-form" class="automata-form">
+              <div class="field-grid">
+                <label class="field">
+                  <span>Tipo</span>
+                  <select id="tipo" name="tipo">
+                    <option value="AFD">AFD</option>
+                    <option value="AFND">AFND</option>
+                  </select>
+                </label>
+
+                <label class="field">
+                  <span>Estados</span>
+                  <input id="estados" name="estados" type="text" placeholder="q0,q1,q2" />
+                </label>
+
+                <label class="field">
+                  <span>Alfabeto</span>
+                  <input id="alfabeto" name="alfabeto" type="text" placeholder="a,b" />
+                </label>
+              </div>
+
+              <label class="field">
+                <span>Agregar nodo</span>
+                <input id="node-quick-input" type="text" placeholder="q0 + Enter" />
+              </label>
+
+              <div id="node-list" class="node-list"></div>
+            </form>
+          </section>
+
+          <section class="panel-block">
+            <div class="panel-block-header">
+              <h2>Resumen formal</h2>
+            </div>
+            <div id="summary-cards" class="summary-cards"></div>
+            <div id="error-banner" class="message-banner is-hidden" role="alert"></div>
+            <div id="success-banner" class="message-banner success is-hidden"></div>
+          </section>
+
+          <section class="panel-block">
+            <div class="panel-block-header">
+              <h2>Recorridos</h2>
+            </div>
+            <div id="transition-list-container" class="transition-list empty-state">
+              Aun no hay recorridos.
+            </div>
+          </section>
+
+          <section class="panel-block">
+            <div class="panel-block-header">
+              <h2>Tabla de transiciones</h2>
+            </div>
+            <div id="transition-table-container" class="table-shell empty-state">
+              Aun no hay datos.
+            </div>
+          </section>
+        </aside>
+
+        <section class="center-stage">
+          <div class="graph-stage-meta">
+            <p class="section-kicker">Area central</p>
+            <div class="legend-row">
+              <span class="legend-chip">Inicial</span>
+              <span class="legend-chip final">Final</span>
+              <button id="move-mode-button" class="ghost-button mode-button is-active" type="button">Mover nodos</button>
+              <button id="connect-mode-button" class="ghost-button mode-button" type="button">Crear recorridos</button>
+              <span class="stage-note">Arrastra nodos para reordenar el automata.</span>
+            </div>
+          </div>
+          <div id="graph-container" class="graph-stage empty-state">
+            Captura un automata para visualizarlo aqui.
+          </div>
+        </section>
+
+        <aside class="side-panel right-panel">
+          <div class="compact-topbar">
+            <div>
+              <p class="section-kicker">Panel de operaciones</p>
+              <h2>Procesos</h2>
+            </div>
+          </div>
+
+          <section class="panel-block">
+            <div class="panel-block-header">
+              <h3>Evaluar cadenas</h3>
+            </div>
+            <div class="stack">
+              <label class="field">
+                <span>Cadena unica</span>
+                <input id="cadena-input" type="text" placeholder="abba" />
+              </label>
+              <label class="field">
+                <span>Varias cadenas</span>
+                <textarea id="multi-cadenas-input" rows="5" placeholder="abba&#10;ab&#10;bb"></textarea>
+              </label>
+              <div class="actions">
+                <button id="evaluate-button" class="secondary-button" type="button">Evaluar</button>
+              </div>
+            </div>
+            <div id="evaluation-results" class="results-shell empty-state">
+              Aqui apareceran los recorridos evaluados.
+            </div>
+          </section>
+
+          <section class="panel-block">
+            <div class="panel-block-header">
+              <h3>Conversion</h3>
+              <p>AFND a AFD o explicacion de AFD como AFND.</p>
+            </div>
+            <div class="actions">
+              <button id="convert-button" class="secondary-button" type="button">Ejecutar conversion</button>
+            </div>
+            <div id="conversion-results" class="results-shell empty-state">
+              La conversion aparecera aqui.
+            </div>
+          </section>
+
+          <section class="panel-block">
+            <div class="panel-block-header">
+              <h3>Minimizacion</h3>
+              <p>Disponible para AFD.</p>
+            </div>
+            <div class="actions">
+              <button id="minimize-button" class="secondary-button" type="button">Ejecutar minimizacion</button>
+            </div>
+            <div id="minimization-results" class="results-shell empty-state">
+              La minimizacion aparecera aqui.
+            </div>
+          </section>
+        </aside>
+      </main>
+    </div>
+
+    <dialog id="transition-dialog" class="transition-dialog">
+      <form method="dialog" class="transition-dialog-card">
+        <div class="panel-block-header">
+          <div>
+            <p class="section-kicker">Nuevo recorrido</p>
+            <h3 id="transition-dialog-title">Selecciona simbolos</h3>
+          </div>
+        </div>
+        <div id="transition-symbol-options" class="symbol-options"></div>
+        <menu class="dialog-actions">
+          <button id="transition-cancel-button" class="ghost-button" value="cancel" type="submit">Cancelar</button>
+          <button id="transition-save-button" class="primary-button" value="default" type="submit">Guardar</button>
+        </menu>
+      </form>
+    </dialog>
+
+    <script type="module" src="./src/app.js"></script>
+  </body>
+</html>
