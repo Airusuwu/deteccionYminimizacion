@@ -1,18 +1,23 @@
 :root {
-  --bg: #f4efe5;
-  --surface: rgba(255, 250, 243, 0.92);
-  --surface-strong: rgba(255, 248, 239, 0.98);
-  --line: rgba(90, 59, 36, 0.16);
-  --text: #2e231b;
-  --muted: #78624f;
-  --accent: #b65e3c;
-  --accent-strong: #8d4326;
-  --success: #2d7d56;
-  --danger: #a73f38;
-  --shadow: 0 18px 42px rgba(69, 41, 23, 0.12);
+  --bg: #323031;
+  --surface: rgba(61, 59, 60, 0.88);
+  --surface-strong: rgba(81, 77, 79, 0.96);
+  --line: rgba(193, 189, 179, 0.18);
+  --text: #f1ede7;
+  --muted: #c1bdb3;
+  --accent: #7f7979;
+  --accent-strong: #c1bdb3;
+  --accent-soft: #5f5b6b;
+  --success: #c1bdb3;
+  --danger: #c1bdb3;
+  --shadow: 0 18px 42px rgba(16, 15, 16, 0.32);
   --radius-xl: 24px;
   --radius-lg: 18px;
   --radius-md: 14px;
+  --graph-stroke: #c1bdb3;
+  --graph-fill: #5f5b6b;
+  --graph-label-bg: #7f7979;
+  --graph-preview: #c1bdb3;
 }
 
 * {
@@ -25,15 +30,15 @@ body {
   height: 100%;
   font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
   color: var(--text);
-  background:
-    radial-gradient(circle at top left, rgba(243, 199, 156, 0.45), transparent 28%),
-    radial-gradient(circle at bottom right, rgba(182, 94, 60, 0.15), transparent 24%),
-    linear-gradient(135deg, #faf3ea, #ebddca 52%, #e8d3b5);
 }
 
 body {
   padding: 16px;
   overflow: hidden;
+  background:
+    radial-gradient(circle at top left, rgba(95, 91, 107, 0.42), transparent 26%),
+    radial-gradient(circle at bottom right, rgba(193, 189, 179, 0.1), transparent 22%),
+    linear-gradient(135deg, #323031, #3d3b3c 48%, #5f5b6b);
 }
 
 button,
@@ -57,8 +62,8 @@ select {
   width: 100%;
   padding: 14px 16px;
   border-radius: var(--radius-md);
-  border: 1px solid rgba(90, 59, 36, 0.14);
-  background: rgba(255, 251, 246, 0.95);
+  border: 1px solid rgba(193, 189, 179, 0.14);
+  background: rgba(193, 189, 179, 0.08);
   color: var(--text);
   outline: none;
 }
@@ -66,8 +71,8 @@ select {
 input:focus,
 textarea:focus,
 select:focus {
-  border-color: rgba(182, 94, 60, 0.65);
-  box-shadow: 0 0 0 4px rgba(182, 94, 60, 0.12);
+  border-color: rgba(193, 189, 179, 0.45);
+  box-shadow: 0 0 0 4px rgba(95, 91, 107, 0.28);
 }
 
 textarea {
@@ -184,8 +189,8 @@ h1 {
 .stage-note {
   padding: 10px 14px;
   border-radius: 999px;
-  background: rgba(182, 94, 60, 0.08);
-  border: 1px solid rgba(182, 94, 60, 0.12);
+  background: rgba(193, 189, 179, 0.08);
+  border: 1px solid rgba(193, 189, 179, 0.14);
   font-size: 0.92rem;
   white-space: nowrap;
 }
@@ -234,7 +239,7 @@ h1 {
 
 .secondary-button {
   color: var(--text);
-  background: linear-gradient(135deg, #f7e3cd, #efc79d);
+  background: linear-gradient(135deg, #5f5b6b, #7f7979);
 }
 
 .graph-stage {
@@ -246,11 +251,11 @@ h1 {
   display: grid;
   place-items: center;
   background:
-    linear-gradient(180deg, rgba(255, 252, 247, 0.98), rgba(244, 228, 207, 0.76)),
-    linear-gradient(90deg, rgba(141, 67, 38, 0.03) 1px, transparent 1px),
-    linear-gradient(rgba(141, 67, 38, 0.03) 1px, transparent 1px);
+    linear-gradient(180deg, rgba(61, 59, 60, 0.98), rgba(50, 48, 49, 0.92)),
+    linear-gradient(90deg, rgba(193, 189, 179, 0.06) 1px, transparent 1px),
+    linear-gradient(rgba(193, 189, 179, 0.06) 1px, transparent 1px);
   background-size: auto, 30px 30px, 30px 30px;
-  border: 1px dashed rgba(90, 59, 36, 0.18);
+  border: 1px dashed rgba(193, 189, 179, 0.16);
 }
 
 .empty-state {
@@ -268,11 +273,13 @@ h1 {
   padding: 8px 12px;
   border-radius: 999px;
   box-shadow: none;
-  background: rgba(255, 248, 239, 0.92);
+  background: rgba(193, 189, 179, 0.08);
+  color: var(--text);
 }
 
 .legend-chip.final {
-  background: rgba(243, 199, 156, 0.3);
+  background: rgba(95, 91, 107, 0.42);
+  color: #f1ede7;
 }
 
 .mode-button {
@@ -280,8 +287,9 @@ h1 {
 }
 
 .mode-button.is-active {
-  background: linear-gradient(135deg, #f7e3cd, #efc79d);
-  border: 1px solid rgba(182, 94, 60, 0.24);
+  background: linear-gradient(135deg, #7f7979, #c1bdb3);
+  border: 1px solid rgba(193, 189, 179, 0.24);
+  color: #323031;
 }
 
 .node-item,
@@ -290,8 +298,8 @@ h1 {
   gap: 10px;
   padding: 12px;
   border-radius: var(--radius-lg);
-  border: 1px solid rgba(90, 59, 36, 0.12);
-  background: rgba(255, 248, 240, 0.84);
+  border: 1px solid rgba(193, 189, 179, 0.12);
+  background: rgba(193, 189, 179, 0.06);
 }
 
 .node-item-header,
@@ -319,21 +327,21 @@ h1 {
   gap: 6px;
   padding: 8px 12px;
   border-radius: 999px;
-  border: 1px solid rgba(90, 59, 36, 0.12);
-  background: rgba(255, 251, 246, 0.95);
+  border: 1px solid rgba(193, 189, 179, 0.12);
+  background: rgba(193, 189, 179, 0.08);
   color: var(--muted);
 }
 
 .toggle-chip.is-active {
   color: var(--accent-strong);
-  border-color: rgba(182, 94, 60, 0.28);
-  background: rgba(243, 199, 156, 0.22);
+  border-color: rgba(193, 189, 179, 0.28);
+  background: rgba(95, 91, 107, 0.34);
 }
 
 .icon-button {
   border-radius: 12px;
   padding: 10px 12px;
-  background: rgba(167, 63, 56, 0.1);
+  background: rgba(193, 189, 179, 0.08);
   color: var(--danger);
 }
 
@@ -365,7 +373,7 @@ table {
 th,
 td {
   padding: 11px 12px;
-  border-bottom: 1px solid rgba(90, 59, 36, 0.12);
+  border-bottom: 1px solid rgba(193, 189, 179, 0.12);
   text-align: left;
   vertical-align: top;
 }
@@ -377,15 +385,15 @@ th {
 .message-banner {
   padding: 14px 16px;
   border-radius: 16px;
-  background: rgba(167, 63, 56, 0.12);
+  background: rgba(95, 91, 107, 0.24);
   color: var(--danger);
-  border: 1px solid rgba(167, 63, 56, 0.2);
+  border: 1px solid rgba(193, 189, 179, 0.18);
 }
 
 .message-banner.success {
-  background: rgba(45, 125, 86, 0.12);
-  color: var(--success);
-  border-color: rgba(45, 125, 86, 0.22);
+  background: rgba(193, 189, 179, 0.18);
+  color: #f1ede7;
+  border-color: rgba(193, 189, 179, 0.22);
 }
 
 .is-hidden {
@@ -404,12 +412,12 @@ th {
 }
 
 .pill.success {
-  background: rgba(45, 125, 86, 0.12);
-  color: var(--success);
+  background: rgba(193, 189, 179, 0.16);
+  color: #f1ede7;
 }
 
 .pill.danger {
-  background: rgba(167, 63, 56, 0.12);
+  background: rgba(95, 91, 107, 0.26);
   color: var(--danger);
 }
 
@@ -460,7 +468,7 @@ th {
 }
 
 .transition-dialog::backdrop {
-  background: rgba(46, 35, 27, 0.28);
+  background: rgba(50, 48, 49, 0.55);
   backdrop-filter: blur(4px);
 }
 
@@ -484,8 +492,8 @@ th {
   gap: 8px;
   padding: 12px 14px;
   border-radius: var(--radius-md);
-  border: 1px solid rgba(90, 59, 36, 0.12);
-  background: rgba(255, 251, 246, 0.95);
+  border: 1px solid rgba(193, 189, 179, 0.12);
+  background: rgba(193, 189, 179, 0.08);
 }
 
 @media (max-width: 1400px) {

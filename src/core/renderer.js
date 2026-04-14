@@ -39,9 +39,9 @@ export function renderAutomataSvg(automata, positions, interaction = {}) {
 
     return `
       <g class="${classNames.join(" ")}" data-state="${escapeText(estado)}" transform="translate(${x}, ${y})">
-        ${isInitial ? `<path d="M -96 0 L -44 0" stroke="#8d4326" stroke-width="3" marker-end="url(#arrowhead)" fill="none" />` : ""}
-        <circle cx="0" cy="0" r="${NODE_RADIUS}" fill="#fffaf4" stroke="#8d4326" stroke-width="3" />
-        ${isFinal ? `<circle cx="0" cy="0" r="${NODE_RADIUS - 8}" fill="none" stroke="#8d4326" stroke-width="2" />` : ""}
+        ${isInitial ? `<path d="M -96 0 L -44 0" stroke="var(--graph-stroke)" stroke-width="3" marker-end="url(#arrowhead)" fill="none" />` : ""}
+        <circle cx="0" cy="0" r="${NODE_RADIUS}" fill="var(--graph-fill)" stroke="var(--graph-stroke)" stroke-width="3" />
+        ${isFinal ? `<circle cx="0" cy="0" r="${NODE_RADIUS - 8}" fill="none" stroke="var(--graph-stroke)" stroke-width="2" />` : ""}
         <text x="0" y="6" text-anchor="middle" font-size="16" font-weight="700">${escapeText(estado)}</text>
       </g>
     `;
@@ -51,7 +51,7 @@ export function renderAutomataSvg(automata, positions, interaction = {}) {
     <svg class="graph-svg" viewBox="0 0 ${WIDTH} ${HEIGHT}" role="img" aria-label="Grafo del automata">
       <defs>
         <marker id="arrowhead" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto">
-          <path d="M 0 0 L 8 3 L 0 6 z" fill="#8d4326"></path>
+          <path d="M 0 0 L 8 3 L 0 6 z" fill="var(--graph-stroke)"></path>
         </marker>
       </defs>
       ${edgesMarkup}
@@ -107,8 +107,8 @@ function renderArrow(from, to, label) {
 
   return `
     <g class="graph-edge">
-      <path d="M ${startX} ${startY} L ${endX} ${endY}" stroke="#8d4326" stroke-width="2.5" fill="none" marker-end="url(#arrowhead)" />
-      <rect x="${midX - 36}" y="${midY - 16}" width="72" height="24" rx="12" fill="#fff3e4"></rect>
+      <path d="M ${startX} ${startY} L ${endX} ${endY}" stroke="var(--graph-stroke)" stroke-width="2.5" fill="none" marker-end="url(#arrowhead)" />
+      <rect x="${midX - 36}" y="${midY - 16}" width="72" height="24" rx="12" fill="var(--graph-label-bg)"></rect>
       <text x="${midX}" y="${midY}" text-anchor="middle" dominant-baseline="middle" font-size="13">${escapeText(label)}</text>
     </g>
   `;
@@ -118,8 +118,8 @@ function renderSelfLoop(position, label) {
   const { x, y } = position;
   return `
     <g class="graph-edge">
-      <path d="M ${x - 12} ${y - 30} C ${x - 48} ${y - 88}, ${x + 48} ${y - 88}, ${x + 12} ${y - 30}" stroke="#8d4326" stroke-width="2.5" fill="none" marker-end="url(#arrowhead)" />
-      <rect x="${x - 36}" y="${y - 118}" width="72" height="24" rx="12" fill="#fff3e4"></rect>
+      <path d="M ${x - 12} ${y - 30} C ${x - 48} ${y - 88}, ${x + 48} ${y - 88}, ${x + 12} ${y - 30}" stroke="var(--graph-stroke)" stroke-width="2.5" fill="none" marker-end="url(#arrowhead)" />
+      <rect x="${x - 36}" y="${y - 118}" width="72" height="24" rx="12" fill="var(--graph-label-bg)"></rect>
       <text x="${x}" y="${y - 106}" text-anchor="middle" font-size="13">${escapeText(label)}</text>
     </g>
   `;
@@ -128,7 +128,7 @@ function renderSelfLoop(position, label) {
 function renderPreviewArrow(from, to) {
   return `
     <g class="graph-edge graph-edge-preview">
-      <path d="M ${from.x} ${from.y} L ${to.x} ${to.y}" stroke="#b65e3c" stroke-width="2.5" stroke-dasharray="9 7" fill="none" marker-end="url(#arrowhead)" opacity="0.9" />
+      <path d="M ${from.x} ${from.y} L ${to.x} ${to.y}" stroke="var(--graph-preview)" stroke-width="2.5" stroke-dasharray="9 7" fill="none" marker-end="url(#arrowhead)" opacity="0.9" />
     </g>
   `;
 }
