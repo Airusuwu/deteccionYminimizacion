@@ -21,8 +21,10 @@ const moveModeButton = document.querySelector("#move-mode-button");
 const connectModeButton = document.querySelector("#connect-mode-button");
 const transitionDialog = document.querySelector("#transition-dialog");
 const transitionDialogTitle = document.querySelector("#transition-dialog-title");
+const transitionDialogDescription = document.querySelector("#transition-dialog-description");
 const transitionSymbolOptions = document.querySelector("#transition-symbol-options");
 const stageNote = document.querySelector(".stage-note");
+const statesInput = document.querySelector("#estados");
 
 let editorState = createEmptyEditorState();
 let currentAutomata = null;
@@ -91,6 +93,7 @@ function loadExample() {
 function syncInputsFromState() {
   typeSelect.value = editorState.tipo;
   alphabetInput.value = editorState.alfabeto.join(",");
+  statesInput.value = editorState.estados.join(",");
 }
 
 function handleQuickNodeSubmit(event) {
@@ -293,6 +296,7 @@ function buildGraphModelForPreview() {
 }
 
 function renderAll(graphModel) {
+  syncInputsFromState();
   renderSummary(graphModel);
   renderNodeList(graphModel);
   renderTransitionList();
@@ -437,6 +441,7 @@ function attachGraphInteractions() {
       } else {
         connectingState = targetState;
         previewPointer = graphPositions[targetState];
+        renderGraph(buildGraphModelForPreview());
       }
       node.classList.add(currentMode === "move" || activeGraphSource !== "editor" ? "dragging" : "connecting");
       event.preventDefault();
@@ -529,10 +534,12 @@ function openTransitionDialog() {
   }
 
   transitionDialogTitle.textContent = `${pendingConnection.origen} -> ${pendingConnection.destino}`;
+  transitionDialogDescription.textContent = "Selecciona los simbolos del alfabeto que activaran este recorrido entre el nodo origen y el nodo destino.";
   transitionSymbolOptions.innerHTML = editorState.alfabeto.map((simbolo) => `
     <label class="symbol-option">
       <input type="checkbox" name="transition-symbol" value="${escapeHtml(simbolo)}" />
-      <span>${escapeHtml(simbolo)}</span>
+      <span class="symbol-option-mark">${escapeHtml(simbolo)}</span>
+      <span class="symbol-option-text">Usar simbolo ${escapeHtml(simbolo)}</span>
     </label>
   `).join("");
 

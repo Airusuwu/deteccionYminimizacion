@@ -38,7 +38,7 @@
 
                 <label class="field">
                   <span>Estados</span>
-                  <input id="estados" name="estados" type="text" placeholder="q0,q1,q2" />
+                  <input id="estados" name="estados" type="text" placeholder="Se actualiza automaticamente" readonly />
                 </label>
 
                 <label class="field">
@@ -161,10 +161,13 @@
 
     <dialog id="transition-dialog" class="transition-dialog">
       <form method="dialog" class="transition-dialog-card">
-        <div class="panel-block-header">
-          <div>
+        <div class="transition-dialog-header">
+          <div class="transition-dialog-copy">
             <p class="section-kicker">Nuevo recorrido</p>
             <h3 id="transition-dialog-title">Selecciona simbolos</h3>
+            <p id="transition-dialog-description" class="transition-dialog-description">
+              Elige uno o varios simbolos del alfabeto para asignarlos a este recorrido.
+            </p>
           </div>
         </div>
         <div id="transition-symbol-options" class="symbol-options"></div>

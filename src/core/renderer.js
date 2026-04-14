@@ -127,8 +127,8 @@ function renderSelfLoop(position, label) {
 
 function renderPreviewArrow(from, to) {
   return `
-    <g class="graph-edge graph-edge-preview">
-      <path d="M ${from.x} ${from.y} L ${to.x} ${to.y}" stroke="var(--graph-preview)" stroke-width="2.5" stroke-dasharray="9 7" fill="none" marker-end="url(#arrowhead)" opacity="0.9" />
+    <g class="graph-edge graph-edge-preview" pointer-events="none">
+      <path d="M ${from.x} ${from.y} L ${to.x} ${to.y}" stroke="var(--graph-preview)" stroke-width="4" stroke-dasharray="10 6" fill="none" marker-end="url(#arrowhead)" opacity="1" />
     </g>
   `;
 }
