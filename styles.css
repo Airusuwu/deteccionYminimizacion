@@ -144,6 +144,7 @@ textarea {
   justify-content: space-between;
   align-items: center;
   gap: 12px;
+  flex-wrap: wrap;
 }
 
 .compact-topbar {
@@ -192,12 +193,76 @@ h1 {
   background: rgba(193, 189, 179, 0.08);
   border: 1px solid rgba(193, 189, 179, 0.14);
   font-size: 0.92rem;
-  white-space: nowrap;
+  white-space: normal;
+  overflow-wrap: anywhere;
 }
 
 .panel-block {
   border-radius: var(--radius-lg);
   padding: 16px;
+  min-width: 0;
+}
+
+.accordion-block {
+  overflow: visible;
+}
+
+.accordion-toggle {
+  list-style: none;
+  cursor: pointer;
+  margin: -2px;
+  width: 100%;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  column-gap: 12px;
+  row-gap: 6px;
+  align-items: start;
+}
+
+.accordion-toggle h2,
+.accordion-toggle h3,
+.accordion-toggle p {
+  margin-bottom: 0;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.accordion-toggle p {
+  grid-column: 1;
+}
+
+.accordion-toggle::-webkit-details-marker {
+  display: none;
+}
+
+.accordion-toggle::after {
+  content: "+";
+  margin-left: auto;
+  min-width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  background: rgba(193, 189, 179, 0.08);
+  border: 1px solid rgba(193, 189, 179, 0.14);
+  color: var(--accent-strong);
+  font-size: 1rem;
+  line-height: 1;
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  align-self: start;
+}
+
+.accordion-block[open] > .accordion-toggle::after {
+  content: "-";
+}
+
+.accordion-content {
+  display: grid;
+  gap: 12px;
+  margin-top: 14px;
+  min-width: 0;
 }
 
 .automata-form,

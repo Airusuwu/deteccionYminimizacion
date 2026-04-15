@@ -20,70 +20,78 @@
             </button>
           </div>
 
-          <section class="panel-block">
-            <div class="panel-block-header">
+          <details class="panel-block accordion-block" open>
+            <summary class="panel-block-header accordion-toggle">
               <h2>Definicion</h2>
               <p>La vista del centro se actualiza mientras editas.</p>
+            </summary>
+
+            <div class="accordion-content">
+              <form id="automata-form" class="automata-form">
+                <div class="field-grid">
+                  <label class="field">
+                    <span>Tipo</span>
+                    <select id="tipo" name="tipo">
+                      <option value="AUTO">Automatico</option>
+                      <option value="AFD">AFD</option>
+                      <option value="AFND">AFND</option>
+                    </select>
+                  </label>
+
+                  <label class="field">
+                    <span>Estados</span>
+                    <input id="estados" name="estados" type="text" placeholder="Se actualiza automaticamente" readonly />
+                  </label>
+
+                  <label class="field">
+                    <span>Alfabeto</span>
+                    <input id="alfabeto" name="alfabeto" type="text" placeholder="a,b" />
+                  </label>
+                </div>
+
+                <label class="field">
+                  <span>Agregar nodo</span>
+                  <input id="node-quick-input" type="text" placeholder="q0 + Enter" />
+                </label>
+
+                <div id="node-list" class="node-list"></div>
+              </form>
             </div>
+          </details>
 
-            <form id="automata-form" class="automata-form">
-              <div class="field-grid">
-                <label class="field">
-                  <span>Tipo</span>
-                  <select id="tipo" name="tipo">
-                    <option value="AUTO">Automatico</option>
-                    <option value="AFD">AFD</option>
-                    <option value="AFND">AFND</option>
-                  </select>
-                </label>
-
-                <label class="field">
-                  <span>Estados</span>
-                  <input id="estados" name="estados" type="text" placeholder="Se actualiza automaticamente" readonly />
-                </label>
-
-                <label class="field">
-                  <span>Alfabeto</span>
-                  <input id="alfabeto" name="alfabeto" type="text" placeholder="a,b" />
-                </label>
-              </div>
-
-              <label class="field">
-                <span>Agregar nodo</span>
-                <input id="node-quick-input" type="text" placeholder="q0 + Enter" />
-              </label>
-
-              <div id="node-list" class="node-list"></div>
-            </form>
-          </section>
-
-          <section class="panel-block">
-            <div class="panel-block-header">
+          <details class="panel-block accordion-block" open>
+            <summary class="panel-block-header accordion-toggle">
               <h2>Resumen formal</h2>
+            </summary>
+            <div class="accordion-content">
+              <div id="summary-cards" class="summary-cards"></div>
+              <div id="readiness-banner" class="message-banner warning is-hidden"></div>
+              <div id="error-banner" class="message-banner is-hidden" role="alert"></div>
+              <div id="success-banner" class="message-banner success is-hidden"></div>
             </div>
-            <div id="summary-cards" class="summary-cards"></div>
-            <div id="readiness-banner" class="message-banner warning is-hidden"></div>
-            <div id="error-banner" class="message-banner is-hidden" role="alert"></div>
-            <div id="success-banner" class="message-banner success is-hidden"></div>
-          </section>
+          </details>
 
-          <section class="panel-block">
-            <div class="panel-block-header">
+          <details class="panel-block accordion-block">
+            <summary class="panel-block-header accordion-toggle">
               <h2>Recorridos</h2>
+            </summary>
+            <div class="accordion-content">
+              <div id="transition-list-container" class="transition-list empty-state">
+                Aun no hay recorridos.
+              </div>
             </div>
-            <div id="transition-list-container" class="transition-list empty-state">
-              Aun no hay recorridos.
-            </div>
-          </section>
+          </details>
 
-          <section class="panel-block">
-            <div class="panel-block-header">
+          <details class="panel-block accordion-block">
+            <summary class="panel-block-header accordion-toggle">
               <h2>Tabla de transiciones</h2>
+            </summary>
+            <div class="accordion-content">
+              <div id="transition-table-container" class="table-shell empty-state">
+                Aun no hay datos.
+              </div>
             </div>
-            <div id="transition-table-container" class="table-shell empty-state">
-              Aun no hay datos.
-            </div>
-          </section>
+          </details>
         </aside>
 
         <section class="center-stage">
@@ -110,53 +118,59 @@
             </div>
           </div>
 
-          <section class="panel-block">
-            <div class="panel-block-header">
+          <details class="panel-block accordion-block" open>
+            <summary class="panel-block-header accordion-toggle">
               <h3>Evaluar cadenas</h3>
-            </div>
-            <div class="stack">
-              <label class="field">
-                <span>Cadena unica</span>
-                <input id="cadena-input" type="text" placeholder="abba" />
-              </label>
-              <label class="field">
-                <span>Varias cadenas</span>
-                <textarea id="multi-cadenas-input" rows="5" placeholder="abba&#10;ab&#10;bb"></textarea>
-              </label>
-              <div class="actions">
-                <button id="evaluate-button" class="secondary-button" type="button">Evaluar</button>
+            </summary>
+            <div class="accordion-content">
+              <div class="stack">
+                <label class="field">
+                  <span>Cadena unica</span>
+                  <input id="cadena-input" type="text" placeholder="abba" />
+                </label>
+                <label class="field">
+                  <span>Varias cadenas</span>
+                  <textarea id="multi-cadenas-input" rows="5" placeholder="abba&#10;ab&#10;bb"></textarea>
+                </label>
+                <div class="actions">
+                  <button id="evaluate-button" class="secondary-button" type="button">Evaluar</button>
+                </div>
+              </div>
+              <div id="evaluation-results" class="results-shell empty-state">
+                Aqui apareceran los recorridos evaluados.
               </div>
             </div>
-            <div id="evaluation-results" class="results-shell empty-state">
-              Aqui apareceran los recorridos evaluados.
-            </div>
-          </section>
+          </details>
 
-          <section class="panel-block">
-            <div class="panel-block-header">
+          <details class="panel-block accordion-block">
+            <summary class="panel-block-header accordion-toggle">
               <h3>Conversion</h3>
               <p>AFND a AFD o explicacion de AFD como AFND.</p>
+            </summary>
+            <div class="accordion-content">
+              <div class="actions">
+                <button id="convert-button" class="secondary-button" type="button">Ejecutar conversion</button>
+              </div>
+              <div id="conversion-results" class="results-shell empty-state">
+                La conversion aparecera aqui.
+              </div>
             </div>
-            <div class="actions">
-              <button id="convert-button" class="secondary-button" type="button">Ejecutar conversion</button>
-            </div>
-            <div id="conversion-results" class="results-shell empty-state">
-              La conversion aparecera aqui.
-            </div>
-          </section>
+          </details>
 
-          <section class="panel-block">
-            <div class="panel-block-header">
+          <details class="panel-block accordion-block">
+            <summary class="panel-block-header accordion-toggle">
               <h3>Minimizacion</h3>
               <p>Disponible para AFD.</p>
+            </summary>
+            <div class="accordion-content">
+              <div class="actions">
+                <button id="minimize-button" class="secondary-button" type="button">Ejecutar minimizacion</button>
+              </div>
+              <div id="minimization-results" class="results-shell empty-state">
+                La minimizacion aparecera aqui.
+              </div>
             </div>
-            <div class="actions">
-              <button id="minimize-button" class="secondary-button" type="button">Ejecutar minimizacion</button>
-            </div>
-            <div id="minimization-results" class="results-shell empty-state">
-              La minimizacion aparecera aqui.
-            </div>
-          </section>
+          </details>
         </aside>
       </main>
     </div>
