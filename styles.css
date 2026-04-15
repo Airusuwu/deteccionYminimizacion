@@ -396,6 +396,12 @@ th {
   border-color: rgba(193, 189, 179, 0.22);
 }
 
+.message-banner.warning {
+  background: rgba(139, 93, 51, 0.18);
+  color: #f2dfca;
+  border-color: rgba(193, 189, 179, 0.22);
+}
+
 .is-hidden {
   display: none;
 }

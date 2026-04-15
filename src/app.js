@@ -1,4 +1,4 @@
-import { Automata, AutomataError } from "./core/automata.js";
+import { Automata, AutomataError, validateAutomataForOperations } from "./core/automata.js";
 import { Evaluator } from "./core/evaluator.js";
 import { Converter } from "./core/converter.js";
 import { Minimizer } from "./core/minimizer.js";
@@ -11,6 +11,7 @@ const transitionListContainer = document.querySelector("#transition-list-contain
 const evaluationResults = document.querySelector("#evaluation-results");
 const conversionResults = document.querySelector("#conversion-results");
 const minimizationResults = document.querySelector("#minimization-results");
+const readinessBanner = document.querySelector("#readiness-banner");
 const errorBanner = document.querySelector("#error-banner");
 const successBanner = document.querySelector("#success-banner");
 const nodeList = document.querySelector("#node-list");
@@ -300,6 +301,7 @@ function buildGraphModelForPreview() {
 function renderAll(graphModel) {
   syncInputsFromState();
   renderSummary(graphModel);
+  renderOperationReadiness(graphModel);
   renderNodeList(graphModel);
   renderTransitionList();
   renderTransitionTable(graphModel);
@@ -322,6 +324,31 @@ function renderSummary(graphModel) {
     summaryItem("Estado inicial", summary.q0),
     summaryItem("Finales", summary.F),
   ].join("");
+}
+
+function renderOperationReadiness(graphModel) {
+  if (!graphModel?.estados?.length) {
+    readinessBanner.classList.add("is-hidden");
+    readinessBanner.textContent = "";
+    return;
+  }
+
+  const warnings = [];
+  if (!graphModel.estadoInicial) {
+    warnings.push("Falta marcar un estado inicial.");
+  }
+  if (!graphModel.estadosFinales?.size) {
+    warnings.push("Falta marcar al menos un estado final.");
+  }
+
+  if (!warnings.length) {
+    readinessBanner.classList.add("is-hidden");
+    readinessBanner.textContent = "";
+    return;
+  }
+
+  readinessBanner.textContent = `${warnings.join(" ")} Las operaciones se habilitan cuando el automata este completo.`;
+  readinessBanner.classList.remove("is-hidden");
 }
 
 function renderNodeList(graphModel) {
@@ -713,9 +740,11 @@ function handleMinimize() {
 function withAutomata(callback) {
   try {
     clearMessages();
-    if (!getOperationAutomata()) {
+    const automata = getOperationAutomata();
+    if (!automata) {
       throw new AutomataError("Debes definir un automata valido antes de ejecutar operaciones.");
     }
+    validateAutomataForOperations(automata);
     callback();
   } catch (error) {
     handleError(error);

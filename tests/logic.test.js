@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 
-import { Automata } from "../src/core/automata.js";
+import { Automata, AutomataError, validateAutomataForOperations } from "../src/core/automata.js";
 import { Evaluator } from "../src/core/evaluator.js";
 import { Converter } from "../src/core/converter.js";
 import { Minimizer } from "../src/core/minimizer.js";
@@ -74,5 +74,23 @@ const afd = Automata.fromForm({
 const minimized = new Minimizer(afd).minimize();
 assert.equal(minimized.automataResultante.tipo, "AFD");
 assert.equal(minimized.automataResultante.estados.length, 2);
+
+assert.throws(
+  () => validateAutomataForOperations({
+    estadoInicial: "",
+    estadosFinales: new Set(["q1"]),
+  }),
+  (error) => error instanceof AutomataError && error.message.includes("estado inicial"),
+);
+
+assert.throws(
+  () => validateAutomataForOperations({
+    estadoInicial: "q0",
+    estadosFinales: new Set(),
+  }),
+  (error) => error instanceof AutomataError && error.message.includes("al menos un estado final"),
+);
+
+assert.doesNotThrow(() => validateAutomataForOperations(afd));
 
 console.log("Pruebas de logica completadas correctamente.");

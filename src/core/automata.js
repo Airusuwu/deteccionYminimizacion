@@ -5,6 +5,16 @@ export class AutomataError extends Error {
   }
 }
 
+export function validateAutomataForOperations(automata) {
+  if (!automata?.estadoInicial) {
+    throw new AutomataError("Marca un estado inicial antes de ejecutar operaciones.");
+  }
+
+  if (!automata?.estadosFinales?.size) {
+    throw new AutomataError("Marca al menos un estado final antes de ejecutar operaciones.");
+  }
+}
+
 export class Automata {
   constructor({ estados, alfabeto, transiciones = {}, estadoInicial, estadosFinales = [], tipo = "AFD" }) {
     this.estados = Automata.cleanList(estados);
