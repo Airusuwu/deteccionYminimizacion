@@ -1,11 +1,13 @@
-const WIDTH = 980;
-const HEIGHT = 720;
+const WIDTH = 1120;
+const HEIGHT = 780;
 const NODE_RADIUS = 34;
+const LABEL_HEIGHT = 26;
 
 export function getDefaultGraphLayout(automata, previousPositions = {}) {
   const centerX = WIDTH / 2;
   const centerY = HEIGHT / 2;
-  const orbit = Math.min(WIDTH, HEIGHT) * 0.3;
+  const orbitX = WIDTH * 0.28;
+  const orbitY = HEIGHT * 0.3;
   const layout = {};
 
   automata.estados.forEach((estado, index) => {
@@ -17,8 +19,8 @@ export function getDefaultGraphLayout(automata, previousPositions = {}) {
 
     const angle = (Math.PI * 2 * index) / Math.max(automata.estados.length, 1) - Math.PI / 2;
     layout[estado] = clampPosition({
-      x: centerX + Math.cos(angle) * orbit,
-      y: centerY + Math.sin(angle) * orbit,
+      x: centerX + Math.cos(angle) * orbitX,
+      y: centerY + Math.sin(angle) * orbitY,
     });
   });
 
@@ -26,7 +28,12 @@ export function getDefaultGraphLayout(automata, previousPositions = {}) {
 }
 
 export function renderAutomataSvg(automata, positions, interaction = {}) {
-  const edgesMarkup = buildEdgesMarkup(automata, positions, interaction);
+  const edgeRecords = buildEdgeRecords(automata);
+  const edgeMarkup = edgeRecords.map((edge) => renderEdge(edge, positions, edgeRecords)).join("");
+  const previewMarkup = interaction.sourceState && interaction.pointer
+    ? renderPreviewArrow(positions[interaction.sourceState], interaction.pointer)
+    : "";
+
   const nodesMarkup = automata.estados.map((estado) => {
     const { x, y } = positions[estado];
     const isInitial = estado === automata.estadoInicial;
@@ -54,83 +61,184 @@ export function renderAutomataSvg(automata, positions, interaction = {}) {
           <path d="M 0 0 L 8 3 L 0 6 z" fill="var(--graph-stroke)"></path>
         </marker>
       </defs>
-      ${edgesMarkup}
+      ${edgeMarkup}
+      ${previewMarkup}
       ${nodesMarkup}
     </svg>
   `;
 }
 
-function buildEdgesMarkup(automata, positions, interaction) {
-  const edgesByPair = new Map();
+function buildEdgeRecords(automata) {
+  const grouped = new Map();
 
   for (const origen of automata.estados) {
-    const mapa = automata.transiciones[origen] ?? {};
-    for (const [simbolo, destinos] of Object.entries(mapa)) {
+    const transitions = automata.transiciones[origen] ?? {};
+    for (const [simbolo, destinos] of Object.entries(transitions)) {
       for (const destino of destinos) {
         const key = `${origen}->${destino}`;
-        if (!edgesByPair.has(key)) {
-          edgesByPair.set(key, []);
+        if (!grouped.has(key)) {
+          grouped.set(key, {
+            origen,
+            destino,
+            simbolos: [],
+          });
         }
-        edgesByPair.get(key).push(simbolo);
+        grouped.get(key).simbolos.push(simbolo);
       }
     }
   }
 
-  const baseEdges = [...edgesByPair.entries()].map(([pair, simbolos]) => {
-    const [origen, destino] = pair.split("->");
-    const from = positions[origen];
-    const to = positions[destino];
-    const label = simbolos.sort().join(", ");
-    return origen === destino ? renderSelfLoop(from, label) : renderArrow(from, to, label);
-  }).join("");
-
-  if (interaction.sourceState && interaction.pointer) {
-    const from = positions[interaction.sourceState];
-    return `${baseEdges}${renderPreviewArrow(from, interaction.pointer)}`;
-  }
-
-  return baseEdges;
+  return [...grouped.values()].map((edge) => ({
+    ...edge,
+    simbolos: edge.simbolos.sort(),
+    label: edge.simbolos.sort().join(", "),
+  }));
 }
 
-function renderArrow(from, to, label) {
-  const dx = to.x - from.x;
-  const dy = to.y - from.y;
-  const distance = Math.hypot(dx, dy) || 1;
-  const unitX = dx / distance;
-  const unitY = dy / distance;
-  const startX = from.x + unitX * NODE_RADIUS;
-  const startY = from.y + unitY * NODE_RADIUS;
-  const endX = to.x - unitX * NODE_RADIUS;
-  const endY = to.y - unitY * NODE_RADIUS;
-  const midX = (startX + endX) / 2;
-  const midY = (startY + endY) / 2 - 18;
+function renderEdge(edge, positions, allEdges) {
+  const from = positions[edge.origen];
+  const to = positions[edge.destino];
+
+  if (!from || !to) {
+    return "";
+  }
+
+  if (edge.origen === edge.destino) {
+    return renderSelfLoop(from, edge.label);
+  }
+
+  const reverseKey = `${edge.destino}->${edge.origen}`;
+  const hasReverse = allEdges.some((candidate) => `${candidate.origen}->${candidate.destino}` === reverseKey);
+  const geometry = hasReverse
+    ? createBidirectionalGeometry(edge.origen, edge.destino, from, to)
+    : createSingleDirectionGeometry(from, to);
+
+  const labelWidth = Math.max(78, 20 + edge.label.length * 10);
 
   return `
     <g class="graph-edge">
-      <path d="M ${startX} ${startY} L ${endX} ${endY}" stroke="var(--graph-stroke)" stroke-width="2.5" fill="none" marker-end="url(#arrowhead)" />
-      <rect x="${midX - 36}" y="${midY - 16}" width="72" height="24" rx="12" fill="var(--graph-label-bg)"></rect>
-      <text x="${midX}" y="${midY}" text-anchor="middle" dominant-baseline="middle" font-size="13">${escapeText(label)}</text>
+      <path d="${geometry.path}" stroke="var(--graph-stroke)" stroke-width="2.5" fill="none" marker-end="url(#arrowhead)" />
+      <rect x="${geometry.label.x - labelWidth / 2}" y="${geometry.label.y - LABEL_HEIGHT / 2}" width="${labelWidth}" height="${LABEL_HEIGHT}" rx="13" fill="var(--graph-label-bg)"></rect>
+      <text x="${geometry.label.x}" y="${geometry.label.y}" text-anchor="middle" dominant-baseline="middle" font-size="13">${escapeText(edge.label)}</text>
     </g>
   `;
 }
 
+function createSingleDirectionGeometry(from, to) {
+  const vector = normalizeVector(to.x - from.x, to.y - from.y);
+  const normal = { x: -vector.y, y: vector.x };
+  const start = {
+    x: from.x + vector.x * NODE_RADIUS,
+    y: from.y + vector.y * NODE_RADIUS,
+  };
+  const end = {
+    x: to.x - vector.x * NODE_RADIUS,
+    y: to.y - vector.y * NODE_RADIUS,
+  };
+  const bend = Math.min(26, Math.max(12, distanceBetween(from, to) * 0.08));
+  const control = {
+    x: (start.x + end.x) / 2 + normal.x * bend,
+    y: (start.y + end.y) / 2 + normal.y * bend,
+  };
+  const labelPoint = quadraticBezierPoint(start, control, end, 0.5);
+
+  return {
+    path: `M ${start.x} ${start.y} Q ${control.x} ${control.y} ${end.x} ${end.y}`,
+    label: {
+      x: labelPoint.x + normal.x * 12,
+      y: labelPoint.y + normal.y * 12,
+    },
+  };
+}
+
+function createBidirectionalGeometry(origen, destino, from, to) {
+  const vector = normalizeVector(to.x - from.x, to.y - from.y);
+  const normal = { x: -vector.y, y: vector.x };
+  const direction = origen.localeCompare(destino) < 0 ? 1 : -1;
+  const arc = Math.min(118, Math.max(72, distanceBetween(from, to) * 0.26));
+  const lane = 12 * direction;
+
+  const start = {
+    x: from.x + vector.x * NODE_RADIUS + normal.x * lane,
+    y: from.y + vector.y * NODE_RADIUS + normal.y * lane,
+  };
+  const end = {
+    x: to.x - vector.x * NODE_RADIUS + normal.x * lane,
+    y: to.y - vector.y * NODE_RADIUS + normal.y * lane,
+  };
+
+  const control1 = {
+    x: start.x + normal.x * arc + vector.x * 24,
+    y: start.y + normal.y * arc + vector.y * 24,
+  };
+  const control2 = {
+    x: end.x + normal.x * arc - vector.x * 24,
+    y: end.y + normal.y * arc - vector.y * 24,
+  };
+
+  const labelPoint = cubicBezierPoint(start, control1, control2, end, 0.5);
+
+  return {
+    path: `M ${start.x} ${start.y} C ${control1.x} ${control1.y} ${control2.x} ${control2.y} ${end.x} ${end.y}`,
+    label: {
+      x: labelPoint.x + normal.x * 18,
+      y: labelPoint.y + normal.y * 18,
+    },
+  };
+}
+
 function renderSelfLoop(position, label) {
   const { x, y } = position;
+  const labelWidth = Math.max(74, 20 + label.length * 10);
+
   return `
     <g class="graph-edge">
-      <path d="M ${x - 12} ${y - 30} C ${x - 48} ${y - 88}, ${x + 48} ${y - 88}, ${x + 12} ${y - 30}" stroke="var(--graph-stroke)" stroke-width="2.5" fill="none" marker-end="url(#arrowhead)" />
-      <rect x="${x - 36}" y="${y - 118}" width="72" height="24" rx="12" fill="var(--graph-label-bg)"></rect>
-      <text x="${x}" y="${y - 106}" text-anchor="middle" font-size="13">${escapeText(label)}</text>
+      <path d="M ${x - 12} ${y - 30} C ${x - 48} ${y - 92}, ${x + 48} ${y - 92}, ${x + 12} ${y - 30}" stroke="var(--graph-stroke)" stroke-width="2.5" fill="none" marker-end="url(#arrowhead)" />
+      <rect x="${x - labelWidth / 2}" y="${y - 126}" width="${labelWidth}" height="${LABEL_HEIGHT}" rx="13" fill="var(--graph-label-bg)"></rect>
+      <text x="${x}" y="${y - 113}" text-anchor="middle" dominant-baseline="middle" font-size="13">${escapeText(label)}</text>
     </g>
   `;
 }
 
 function renderPreviewArrow(from, to) {
+  const geometry = createSingleDirectionGeometry(from, to);
   return `
     <g class="graph-edge graph-edge-preview" pointer-events="none">
-      <path d="M ${from.x} ${from.y} L ${to.x} ${to.y}" stroke="var(--graph-preview)" stroke-width="4" stroke-dasharray="10 6" fill="none" marker-end="url(#arrowhead)" opacity="1" />
+      <path d="${geometry.path}" stroke="var(--graph-preview)" stroke-width="4" stroke-dasharray="10 6" fill="none" marker-end="url(#arrowhead)" opacity="1" />
     </g>
   `;
+}
+
+function normalizeVector(dx, dy) {
+  const distance = Math.hypot(dx, dy) || 1;
+  return {
+    x: dx / distance,
+    y: dy / distance,
+  };
+}
+
+function distanceBetween(from, to) {
+  return Math.hypot(to.x - from.x, to.y - from.y);
+}
+
+function quadraticBezierPoint(start, control, end, t) {
+  return {
+    x: ((1 - t) ** 2 * start.x) + (2 * (1 - t) * t * control.x) + ((t ** 2) * end.x),
+    y: ((1 - t) ** 2 * start.y) + (2 * (1 - t) * t * control.y) + ((t ** 2) * end.y),
+  };
+}
+
+function cubicBezierPoint(start, control1, control2, end, t) {
+  return {
+    x: ((1 - t) ** 3 * start.x)
+      + (3 * ((1 - t) ** 2) * t * control1.x)
+      + (3 * (1 - t) * (t ** 2) * control2.x)
+      + ((t ** 3) * end.x),
+    y: ((1 - t) ** 3 * start.y)
+      + (3 * ((1 - t) ** 2) * t * control1.y)
+      + (3 * (1 - t) * (t ** 2) * control2.y)
+      + ((t ** 3) * end.y),
+  };
 }
 
 function escapeText(value) {
@@ -142,7 +250,7 @@ function escapeText(value) {
 
 function clampPosition(position) {
   return {
-    x: Math.min(Math.max(position.x, NODE_RADIUS + 20), WIDTH - NODE_RADIUS - 20),
-    y: Math.min(Math.max(position.y, NODE_RADIUS + 20), HEIGHT - NODE_RADIUS - 20),
+    x: Math.min(Math.max(position.x, NODE_RADIUS + 28), WIDTH - NODE_RADIUS - 28),
+    y: Math.min(Math.max(position.y, NODE_RADIUS + 28), HEIGHT - NODE_RADIUS - 28),
   };
 }
