@@ -666,7 +666,8 @@ function ensureStateReferences() {
 
 function handleEvaluate() {
   withAutomata(() => {
-    const evaluator = new Evaluator(currentAutomata);
+    const sourceAutomata = getOperationAutomata();
+    const evaluator = new Evaluator(sourceAutomata);
     const cadena = document.querySelector("#cadena-input").value;
     const multiple = document.querySelector("#multi-cadenas-input").value;
     const results = [];
